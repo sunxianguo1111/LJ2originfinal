@@ -1574,7 +1574,7 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 
 	for (j=PML+1; j<PML+m_GridnumZ; j++)
 	{
-	     m_vecALX[(PML)*(2*PML+m_GridnumZ-1)+j]=m_vecGridUA[j-PML-1];
+	     m_vecGridUA[j-PML-1]=m_vecALX[(PML)*(2*PML+m_GridnumZ-1)+j];
 	}
 
 	//ALZ     计算方法同混合网格    重合部分使用grideUB
@@ -1748,7 +1748,7 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 
 	for (j=PML+1; j<PML+m_GridnumZ; j++)
 	{
-		m_vecARX[(PML)*(2*PML+m_GridnumZ-1)+j]=m_vecGridUA[(m_GridnumX-1)*(m_GridnumZ-1)+j-PML-1];
+		m_vecGridUA[(m_GridnumX-1)*(m_GridnumZ-1)+j-PML-1]=m_vecARX[(PML)*(2*PML+m_GridnumZ-1)+j];
 	}
 
 	//ARZ
@@ -1915,7 +1915,7 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 
 	for (i=0; i<m_GridnumX-1; i++)
 	{
-		m_vecAUZ[i*(PML+1)+PML]=m_vecGridUB[i*m_GridnumZ];
+		m_vecGridUB[i*m_GridnumZ]=m_vecAUZ[i*(PML+1)+PML];
 	}
 
 
@@ -2044,7 +2044,7 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 
 	for (i=0; i<m_GridnumX-1; i++)
 	{
-		m_vecADZ[i*(PML+1)+PML]=m_vecGridUB[i*m_GridnumZ+m_GridnumZ-1];
+		m_vecGridUB[i*m_GridnumZ+m_GridnumZ-1]=m_vecADZ[i*(PML+1)+PML];
 	}
 
 
