@@ -1901,7 +1901,7 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 			}
 			else if (j==PML)
 			{
-				p1=m_vecGridUNow[GetUstore(i+1,1)];
+				p1=m_vecGridUNext[GetUstore(i+1,1)];
 				p2=m_vecUUX[i*(PML+1)+j]+m_vecUUZ[i*(PML+1)+j];
 			}
 			else
