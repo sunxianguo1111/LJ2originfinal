@@ -1484,6 +1484,45 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 		}
 
 
+					
+   //中间区域 m_vecGridUNext  上下各有一行，左右各有一列没有计算
+		for(i=1;i<=m_GridnumX-1;i++)
+		{
+			for(j=1;j<=m_GridnumZ-1;j++)
+			{
+
+				Compoint.i=i;
+				Compoint.j=j;
+				velocity=m_Vel[GetVelocitystore(Compoint)];
+
+					/*if (i==1||j==1||i==(m_GridnumX-1)||j==(m_GridnumZ-1))
+				m_vecGridUNext[GetUstore(i,j)]=m_vecGridUNext[GetUstore(i,j)]+m_tstep*velocity*velocity*((m_vecGridUA[i*(m_GridnumZ-1)+j-1]
+				-m_vecGridUA[(i-1)*(m_GridnumZ-1)+j-1])/m_GridcellX+(m_vecGridUB[(i-1)*m_GridnumZ+j]-m_vecGridUB[(i-1)*m_GridnumZ+j-1])/m_GridcellZ)
+				-(SourceG(m_t)*m_tstep+Sourcet)*velocity*velocity*m_tstep;
+				else
+				{
+
+				m_vecGridUNext[GetUstore(i,j)]=m_vecGridUNext[GetUstore(i,j)]+m_tstep*velocity*velocity*(1.125*(m_vecGridUA[i*(m_GridnumZ-1)+j-1]
+				-m_vecGridUA[(i-1)*(m_GridnumZ-1)+j-1])/m_GridcellX
+				-1/24.0*(m_vecGridUA[(i+1)*(m_GridnumZ-1)+j-1]-m_vecGridUA[(i-2)*(m_GridnumZ-1)+j-1])/m_GridcellX
+				+1.125*(m_vecGridUB[(i-1)*m_GridnumZ+j]-m_vecGridUB[(i-1)*m_GridnumZ+j-1])/m_GridcellZ
+				-1/24.0*(m_vecGridUB[(i-1)*m_GridnumZ+j+1]-m_vecGridUB[(i-1)*m_GridnumZ+j-2])/m_GridcellZ
+				)
+				-(SourceG(m_t)*m_tstep+Sourcet)*velocity*velocity*m_tstep;}*/
+
+				m_vecGridUNext[GetUstore(i,j)]=m_vecGridUNext[GetUstore(i,j)]+m_tstep*velocity*velocity*((m_vecGridUA[i*(m_GridnumZ-1)+j-1]
+				-m_vecGridUA[(i-1)*(m_GridnumZ-1)+j-1])/m_GridcellX+(m_vecGridUB[(i-1)*m_GridnumZ+j]-m_vecGridUB[(i-1)*m_GridnumZ+j-1])/m_GridcellZ);
+
+				if (i==m_ShotGridX&&j==m_ShotGridZ)
+				{
+				m_vecGridUNext[GetUstore(i,j)]-=(SourceG(m_t)*m_tstep+Sourcet)*velocity*velocity*m_tstep;
+				}
+				
+			}
+
+		m_vecGridRecord[GetRecordstore(i,m_t)]+=m_vecGridUNext[GetUstore(i,L)];
+	}
+
 
 
 
@@ -1578,246 +1617,6 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 	}
 
 
-
-	//////////////////////////////////右边界Rside////////////////////////////////////////
-	alphax=alphaxm;
-	alphaz=alphazm;
-	//ARX
-	for (i=0; i<PML+1; i++)
-	{
-		for (j=0; j<2*PML+m_GridnumZ-1; j++)
-		{
-			alphax=alphaxm*(1-sin(i*3.14159/2/PML));
-			if (i==0)
-			{
-				a1=m_vecARX[j];
-				p2=m_vecURX[2*PML+m_GridnumZ+1+j+1]+m_vecURZ[2*PML+m_GridnumZ+1+j+1];
-				p1=p2;
-				m_vecARX[j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
-			}
-			else if (i==PML)
-			{
-				a1=m_vecARX[i*(2*PML+m_GridnumZ-1)+j];
-				if (j<PML)
-				{
-					p2=m_vecUUX[(m_GridnumX-2)*(PML+1)+j+1]+m_vecUUZ[(m_GridnumX-2)*(PML+1)+j+1];
-				}
-				else if (j<PML+m_GridnumZ-1)
-				{
-					p2=m_vecGridUNext[GetUstore(m_GridnumX-1,j-PML+1)];
-					//p2=m_vecGridUA[(m_GridnumX-1)*(m_GridnumZ-1)+j-PML-1];
-				}
-				else
-				{
-					p2=m_vecUDX[(m_GridnumX-2)*(PML+1)+2*PML+m_GridnumZ-1-j]+m_vecUDZ[(m_GridnumX-2)*(PML+1)+2*PML+m_GridnumZ-1-j];
-				}
-				p1=m_vecURX[i*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[i*(2*PML+m_GridnumZ+1)+j+1];
-				m_vecARX[i*(2*PML+m_GridnumZ-1)+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
-			} 
-			else
-			{
-				a1=m_vecARX[i*(2*PML+m_GridnumZ-1)+j];
-				p2=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j+1];
-				p1=m_vecURX[i*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[i*(2*PML+m_GridnumZ+1)+j+1];
-				m_vecARX[i*(2*PML+m_GridnumZ-1)+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
-			}
-		}
-	}
-
-	for (j=PML; j<PML+m_GridnumZ-2; j++)
-	{
-		m_vecARX[(PML)*(2*PML+m_GridnumZ-1)+j]=m_vecGridUA[(m_GridnumX-1)*(m_GridnumZ-1)+j-PML];
-	}
-
-	//ARZ
-	for (i=0; i<PML; i++)
-	{
-		for (j=0; j<2*PML+m_GridnumZ; j++)
-		{
-			if (j<PML)
-			{
-				alphaz=alphazm*(1-sin(j*3.14159/2/PML));
-			}
-			else if (j<PML+m_GridnumZ-1)
-			{
-				alphaz=0;
-			}
-			else
-			{
-				alphaz=alphazm*(1-sin((2*PML+m_GridnumZ-1-j)*3.14159/2/PML));
-			}
-			a1=m_vecARZ[i*(2*PML+m_GridnumZ)+j];
-			if (j==0)
-			{
-				p1=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+1]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+1];
-				p2=p1;
-			}
-			else if (j==2*PML+m_GridnumZ-1)
-			{
-				p2=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j];
-				p1=p2;
-			}
-			else
-			{
-				p1=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j+1];
-				p2=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j];
-			}
-			m_vecARZ[i*(2*PML+m_GridnumZ)+j]=UPMLabsorb(a1,p1,p2,alphaz,m_GridcellZ);
-		}
-	}
-
-
-	
-	
-
-	/////////////////////////////上边界Upside/////////////////////////////////////////////
-	alphax=0;
-	alphaz=alphazm;
-
-	//AUX
-	for (i=0; i<m_GridnumX-2; i++)
-	{
-		for (j=0; j<PML; j++)
-		{
-			alphaz=alphazm*(1-sin((j+1)*3.14159/2/PML));
-			a1=m_vecAUX[i*PML+j];
-			p1=m_vecUUX[(i+1)*(PML+1)+j+1]+m_vecUUZ[(i+1)*(PML+1)+j+1];
-			p2=m_vecUUX[i*(PML+1)+j+1]+m_vecUUZ[i*(PML+1)+j+1];
-			m_vecAUX[i*PML+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
-		}
-	}
-
-	//AUZ
-	for (i=0; i<m_GridnumX-1; i++)
-	{
-		for (j=0; j<PML+1; j++)
-		{
-			alphaz=alphazm*(1-sin(j*3.14159/2/PML));
-			a1=m_vecAUZ[i*(PML+1)+j];
-			if (j==0)
-			{
-				p1=m_vecUUX[i*(PML+1)+j+1]+m_vecUUZ[i*(PML+1)+j+1];
-				p2=p1;
-			}
-			else if (j==PML)
-			{
-				p1=m_vecGridUNext[GetUstore(i+1,1)];
-				p2=m_vecUUX[i*(PML+1)+j]+m_vecUUZ[i*(PML+1)+j];
-			}
-			else
-			{
-				p1=m_vecUUX[i*(PML+1)+j+1]+m_vecUUZ[i*(PML+1)+j+1];
-				p2=m_vecUUX[i*(PML+1)+j]+m_vecUUZ[i*(PML+1)+j];
-			}
-			m_vecAUZ[i*(PML+1)+j]=UPMLabsorb(a1,p1,p2,alphaz,m_GridcellZ);
-		}
-	}
-
-	for (i=0; i<m_GridnumX-1; i++)
-	{
-	m_vecAUZ[i*(PML+1)+PML]=m_vecGridUB[i*m_GridnumZ];
-	}
-
-
-
-
-	
-
-
-
-	////////////////////////////////下边界Downside//////////////////////////////////////////
-	alphax=0;
-	alphaz=alphazm;
-
-	//ADX
-	for (i=0; i<m_GridnumX-2; i++)
-	{
-		for (j=0; j<PML; j++)
-		{
-			alphaz=alphazm*(1-sin((j+1)*3.14159/2/PML));
-			a1=m_vecADX[i*PML+j];
-			p1=m_vecUDX[(i+1)*(PML+1)+j+1]+m_vecUDZ[(i+1)*(PML+1)+j+1];
-			p2=m_vecUDX[i*(PML+1)+j+1]+m_vecUDZ[i*(PML+1)+j+1];
-			m_vecADX[i*PML+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
-		}
-	}
-
-	//ADZ
-	for (i=0; i<m_GridnumX-1; i++)
-	{
-		for (j=0; j<PML+1; j++)
-		{
-			alphaz=alphazm*(1-sin(j*3.14159/2/PML));
-			a1=m_vecADZ[i*(PML+1)+j];
-			if (j==0)
-			{
-				p2=m_vecUDX[i*(PML+1)+j+1]+m_vecUDZ[i*(PML+1)+j+1];
-				p1=p2;
-			}
-			else if (j==PML)
-			{
-				p2=m_vecGridUNext[GetUstore(i+1,m_GridnumZ-1)];
-				p1=m_vecUDX[i*(PML+1)+j]+m_vecUDZ[i*(PML+1)+j];
-			}
-			else
-			{
-				p2=m_vecUDX[i*(PML+1)+j+1]+m_vecUDZ[i*(PML+1)+j+1];
-				p1=m_vecUDX[i*(PML+1)+j]+m_vecUDZ[i*(PML+1)+j];
-			}
-			m_vecADZ[i*(PML+1)+j]=UPMLabsorb(a1,p1,p2,alphaz,m_GridcellZ);
-		}
-	}
-
-	for (i=0; i<m_GridnumX-1; i++)
-	{
-		m_vecADZ[i*(PML+1)+PML]=m_vecGridUB[i*m_GridnumZ+m_GridnumZ-1];
-	}
-
-
-
-
-
-			
-   //中间区域 m_vecGridUNext  上下各有一行，左右各有一列没有计算
-		for(i=1;i<=m_GridnumX-1;i++)
-		{
-			for(j=1;j<=m_GridnumZ-1;j++)
-			{
-
-				Compoint.i=i;
-				Compoint.j=j;
-				velocity=m_Vel[GetVelocitystore(Compoint)];
-
-					/*if (i==1||j==1||i==(m_GridnumX-1)||j==(m_GridnumZ-1))
-				m_vecGridUNext[GetUstore(i,j)]=m_vecGridUNext[GetUstore(i,j)]+m_tstep*velocity*velocity*((m_vecGridUA[i*(m_GridnumZ-1)+j-1]
-				-m_vecGridUA[(i-1)*(m_GridnumZ-1)+j-1])/m_GridcellX+(m_vecGridUB[(i-1)*m_GridnumZ+j]-m_vecGridUB[(i-1)*m_GridnumZ+j-1])/m_GridcellZ)
-				-(SourceG(m_t)*m_tstep+Sourcet)*velocity*velocity*m_tstep;
-				else
-				{
-
-				m_vecGridUNext[GetUstore(i,j)]=m_vecGridUNext[GetUstore(i,j)]+m_tstep*velocity*velocity*(1.125*(m_vecGridUA[i*(m_GridnumZ-1)+j-1]
-				-m_vecGridUA[(i-1)*(m_GridnumZ-1)+j-1])/m_GridcellX
-				-1/24.0*(m_vecGridUA[(i+1)*(m_GridnumZ-1)+j-1]-m_vecGridUA[(i-2)*(m_GridnumZ-1)+j-1])/m_GridcellX
-				+1.125*(m_vecGridUB[(i-1)*m_GridnumZ+j]-m_vecGridUB[(i-1)*m_GridnumZ+j-1])/m_GridcellZ
-				-1/24.0*(m_vecGridUB[(i-1)*m_GridnumZ+j+1]-m_vecGridUB[(i-1)*m_GridnumZ+j-2])/m_GridcellZ
-				)
-				-(SourceG(m_t)*m_tstep+Sourcet)*velocity*velocity*m_tstep;}*/
-
-				m_vecGridUNext[GetUstore(i,j)]=m_vecGridUNext[GetUstore(i,j)]+m_tstep*velocity*velocity*((m_vecGridUA[i*(m_GridnumZ-1)+j-1]
-				-m_vecGridUA[(i-1)*(m_GridnumZ-1)+j-1])/m_GridcellX+(m_vecGridUB[(i-1)*m_GridnumZ+j]-m_vecGridUB[(i-1)*m_GridnumZ+j-1])/m_GridcellZ);
-
-				if (i==m_ShotGridX&&j==m_ShotGridZ)
-				{
-				m_vecGridUNext[GetUstore(i,j)]-=(SourceG(m_t)*m_tstep+Sourcet)*velocity*velocity*m_tstep;
-				}
-				
-			}
-
-		m_vecGridRecord[GetRecordstore(i,m_t)]+=m_vecGridUNext[GetUstore(i,L)];
-	}
-
-
-
 	//ULX,ULZ
 	Compoint.i=0;
 	for (i=1; i<PML+1; i++)
@@ -1906,6 +1705,93 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 
 
 
+	//////////////////////////////////右边界Rside////////////////////////////////////////
+	alphax=alphaxm;
+	alphaz=alphazm;
+	//ARX
+	for (i=0; i<PML+1; i++)
+	{
+		for (j=0; j<2*PML+m_GridnumZ-1; j++)
+		{
+			alphax=alphaxm*(1-sin(i*3.14159/2/PML));
+			if (i==0)
+			{
+				a1=m_vecARX[j];
+				p2=m_vecURX[2*PML+m_GridnumZ+1+j+1]+m_vecURZ[2*PML+m_GridnumZ+1+j+1];
+				p1=p2;
+				m_vecARX[j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
+			}
+			else if (i==PML)
+			{
+				a1=m_vecARX[i*(2*PML+m_GridnumZ-1)+j];
+				if (j<PML)
+				{
+					p2=m_vecUUX[(m_GridnumX-2)*(PML+1)+j+1]+m_vecUUZ[(m_GridnumX-2)*(PML+1)+j+1];
+				}
+				else if (j<PML+m_GridnumZ-1)
+				{
+					p2=m_vecGridUNext[GetUstore(m_GridnumX-1,j-PML+1)];
+					//p2=m_vecGridUA[(m_GridnumX-1)*(m_GridnumZ-1)+j-PML-1];
+				}
+				else
+				{
+					p2=m_vecUDX[(m_GridnumX-2)*(PML+1)+2*PML+m_GridnumZ-1-j]+m_vecUDZ[(m_GridnumX-2)*(PML+1)+2*PML+m_GridnumZ-1-j];
+				}
+				p1=m_vecURX[i*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[i*(2*PML+m_GridnumZ+1)+j+1];
+				m_vecARX[i*(2*PML+m_GridnumZ-1)+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
+			} 
+			else
+			{
+				a1=m_vecARX[i*(2*PML+m_GridnumZ-1)+j];
+				p2=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j+1];
+				p1=m_vecURX[i*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[i*(2*PML+m_GridnumZ+1)+j+1];
+				m_vecARX[i*(2*PML+m_GridnumZ-1)+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
+			}
+		}
+	}
+
+	for (j=PML; j<PML+m_GridnumZ-2; j++)
+	{
+		m_vecARX[(PML)*(2*PML+m_GridnumZ-1)+j]=m_vecGridUA[(m_GridnumX-1)*(m_GridnumZ-1)+j-PML];
+	}
+
+	//ARZ
+	for (i=0; i<PML; i++)
+	{
+		for (j=0; j<2*PML+m_GridnumZ; j++)
+		{
+			if (j<PML)
+			{
+				alphaz=alphazm*(1-sin(j*3.14159/2/PML));
+			}
+			else if (j<PML+m_GridnumZ-1)
+			{
+				alphaz=0;
+			}
+			else
+			{
+				alphaz=alphazm*(1-sin((2*PML+m_GridnumZ-1-j)*3.14159/2/PML));
+			}
+			a1=m_vecARZ[i*(2*PML+m_GridnumZ)+j];
+			if (j==0)
+			{
+				p1=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+1]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+1];
+				p2=p1;
+			}
+			else if (j==2*PML+m_GridnumZ-1)
+			{
+				p2=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j];
+				p1=p2;
+			}
+			else
+			{
+				p1=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j+1]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j+1];
+				p2=m_vecURX[(i+1)*(2*PML+m_GridnumZ+1)+j]+m_vecURZ[(i+1)*(2*PML+m_GridnumZ+1)+j];
+			}
+			m_vecARZ[i*(2*PML+m_GridnumZ)+j]=UPMLabsorb(a1,p1,p2,alphaz,m_GridcellZ);
+		}
+	}
+
 	//URX,URZ
 	Compoint.i=m_GridnumX;
 	for (i=1; i<PML+1; i++)
@@ -1985,9 +1871,56 @@ void C2DModel::UpdateNextUH(vector<double> m_Vel,int s)
 		}
 	}
 m_vecGridRecord[GetRecordstore(m_GridnumX,m_t)]+=m_vecGridUNext[GetUstore(m_GridnumX,L)];
+	
+	
 
+	/////////////////////////////上边界Upside/////////////////////////////////////////////
+	alphax=0;
+	alphaz=alphazm;
 
+	//AUX
+	for (i=0; i<m_GridnumX-2; i++)
+	{
+		for (j=0; j<PML; j++)
+		{
+			alphaz=alphazm*(1-sin((j+1)*3.14159/2/PML));
+			a1=m_vecAUX[i*PML+j];
+			p1=m_vecUUX[(i+1)*(PML+1)+j+1]+m_vecUUZ[(i+1)*(PML+1)+j+1];
+			p2=m_vecUUX[i*(PML+1)+j+1]+m_vecUUZ[i*(PML+1)+j+1];
+			m_vecAUX[i*PML+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
+		}
+	}
 
+	//AUZ
+	for (i=0; i<m_GridnumX-1; i++)
+	{
+		for (j=0; j<PML+1; j++)
+		{
+			alphaz=alphazm*(1-sin(j*3.14159/2/PML));
+			a1=m_vecAUZ[i*(PML+1)+j];
+			if (j==0)
+			{
+				p1=m_vecUUX[i*(PML+1)+j+1]+m_vecUUZ[i*(PML+1)+j+1];
+				p2=p1;
+			}
+			else if (j==PML)
+			{
+				p1=m_vecGridUNext[GetUstore(i+1,1)];
+				p2=m_vecUUX[i*(PML+1)+j]+m_vecUUZ[i*(PML+1)+j];
+			}
+			else
+			{
+				p1=m_vecUUX[i*(PML+1)+j+1]+m_vecUUZ[i*(PML+1)+j+1];
+				p2=m_vecUUX[i*(PML+1)+j]+m_vecUUZ[i*(PML+1)+j];
+			}
+			m_vecAUZ[i*(PML+1)+j]=UPMLabsorb(a1,p1,p2,alphaz,m_GridcellZ);
+		}
+	}
+
+	for (i=0; i<m_GridnumX-1; i++)
+	{
+	m_vecAUZ[i*(PML+1)+PML]=m_vecGridUB[i*m_GridnumZ];
+	}
 
 
 	//UUX,UUZ
@@ -2065,6 +1998,71 @@ m_vecGridRecord[GetRecordstore(m_GridnumX,m_t)]+=m_vecGridUNext[GetUstore(m_Grid
 		}
 		
 	}
+
+
+
+
+
+	
+
+
+
+	////////////////////////////////下边界Downside//////////////////////////////////////////
+	alphax=0;
+	alphaz=alphazm;
+
+	//ADX
+	for (i=0; i<m_GridnumX-2; i++)
+	{
+		for (j=0; j<PML; j++)
+		{
+			alphaz=alphazm*(1-sin((j+1)*3.14159/2/PML));
+			a1=m_vecADX[i*PML+j];
+			p1=m_vecUDX[(i+1)*(PML+1)+j+1]+m_vecUDZ[(i+1)*(PML+1)+j+1];
+			p2=m_vecUDX[i*(PML+1)+j+1]+m_vecUDZ[i*(PML+1)+j+1];
+			m_vecADX[i*PML+j]=UPMLabsorb(a1,p1,p2,alphax,m_GridcellX);
+		}
+	}
+
+	//ADZ
+	for (i=0; i<m_GridnumX-1; i++)
+	{
+		for (j=0; j<PML+1; j++)
+		{
+			alphaz=alphazm*(1-sin(j*3.14159/2/PML));
+			a1=m_vecADZ[i*(PML+1)+j];
+			if (j==0)
+			{
+				p2=m_vecUDX[i*(PML+1)+j+1]+m_vecUDZ[i*(PML+1)+j+1];
+				p1=p2;
+			}
+			else if (j==PML)
+			{
+				p2=m_vecGridUNext[GetUstore(i+1,m_GridnumZ-1)];
+				p1=m_vecUDX[i*(PML+1)+j]+m_vecUDZ[i*(PML+1)+j];
+			}
+			else
+			{
+				p2=m_vecUDX[i*(PML+1)+j+1]+m_vecUDZ[i*(PML+1)+j+1];
+				p1=m_vecUDX[i*(PML+1)+j]+m_vecUDZ[i*(PML+1)+j];
+			}
+			m_vecADZ[i*(PML+1)+j]=UPMLabsorb(a1,p1,p2,alphaz,m_GridcellZ);
+		}
+	}
+
+	for (i=0; i<m_GridnumX-1; i++)
+	{
+		m_vecADZ[i*(PML+1)+PML]=m_vecGridUB[i*m_GridnumZ+m_GridnumZ-1];
+	}
+
+
+
+
+
+
+
+
+
 
 
 
