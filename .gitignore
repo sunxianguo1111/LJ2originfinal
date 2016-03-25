@@ -45,3 +45,32 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+/debug
+/release
+.gitignore
+*.mat
+*.jpg
+*.txt
+*.dsw
+*.dsp
+*.aps
+*.zip
+*.ncb
+*.opt
+*.plg
+*.rc
+*.sdf
+*.sln
+*.suo
+*.vcxproj
+*.fd
+*.asv
+*.lib
+*.swp 
+*.filters 
+*.user
+/res
+/ipch
+
